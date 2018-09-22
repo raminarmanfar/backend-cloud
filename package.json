@@ -1,5 +1,5 @@
 {
-  "name": "my-app-backend",
+  "name": "backend-cloud-app",
   "version": "0.1.0",
   "description": "Backend with mongoose",
   "main": "index.ts",
