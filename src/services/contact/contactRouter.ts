@@ -19,15 +19,15 @@ export default class ContactRouter {
     }
 
     public getAllContacts(req: Request, res: Response): void {
-        new ContactController().getAll((status:number, data: any) => res.status(status).json(data));
+        new ContactController().getAll().then(result => res.status(result.responseCode).json(result));
     }
 
     public getContactByContactId(req: Request, res: Response): void {
-        new ContactController().getByContactId(req.params.id, (status:number, data: any) => res.status(status).json(data));
+        new ContactController().getByContactId(req.params.id).then(result => res.status(result.responseCode).json(result));
     }
 
     public create(req: Request, res: Response): void {
-        new ContactController().create(req.body, (status: number, data: any) => res.status(status).json(data));
+        new ContactController().create(req.body).then(result => res.status(result.responseCode).json(result));
     }
 
     public update(req: Request, res: Response): void {
