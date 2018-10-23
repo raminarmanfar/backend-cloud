@@ -8,10 +8,11 @@ import mongoose from 'mongoose';
 import logger from 'morgan';
 import * as path from 'path';
 // import configs
-import config from './config/config';
+import config from './config';
 // import routers
 import UserRouter from './services/users/UserRouter';
 import PostRouter from './services/posts/PostRouter';
+import ContactRouter from './services/contact/contactRouter';
 
 export default class Server {
   // set app to be of type express.Application
@@ -56,6 +57,7 @@ export default class Server {
     this.app.use('/', router);
     this.app.use('/api/users', new UserRouter().router);
     this.app.use('/api/posts', new PostRouter().router);
+    this.app.use('/api/contacts', new ContactRouter().router);
   }
 
   public start() {
