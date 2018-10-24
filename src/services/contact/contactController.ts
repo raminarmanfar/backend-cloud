@@ -38,28 +38,30 @@ export default class ContactController {
             });
 
             contactModel.save().then((data) => {
-                const respSuccess: ServiceResponse = new ServiceResponse(true, 201, 'Contact message sent successfully.', data);
-                resolve(respSuccess);
+                resolve(new ServiceResponse(true, 201, 'Contact message sent successfully.', data));
             }).catch((error) => {
-                const respError: ServiceResponse = new ServiceResponse(false, 500, 'Error Occured while submitting your contact message.', error);
-                resolve(respError);
+                resolve(new ServiceResponse(false, 500, 'Error Occured while submitting your contact message.', error));
             });
         });
     }
 
-    public update(id: string, newData: any, cb: any) {
-        ContactModel.findByIdAndUpdate(id, newData).then((data) => {
-            cb(200, data);
-        }).catch((error) => {
-            cb(500, error);
+    public update(id: string, newData: any): Promise<ServiceResponse> {
+        return new Promise((resolve: any) => {
+            ContactModel.findByIdAndUpdate(id, newData).then((data) => {
+                resolve(new ServiceResponse(true, 200, 'Requested record has been updated successfully.', data));
+            }).catch((error) => {
+                resolve(new ServiceResponse(false, 500, 'Error occured while trying to update the requested record.', error));
+            });
         });
     }
 
-    public delete(id: string, cb: any) {
-        ContactModel.findByIdAndDelete(id).then(() => {
-            cb(null);
-        }).catch((error) => {
-            cb(error);
+    public delete(id: string): Promise<ServiceResponse> {
+        return new Promise((resolve: any) => {
+            ContactModel.findByIdAndDelete(id).then(() => {
+                resolve(new ServiceResponse(true, 200, 'Requested record has been deleted successfully.', null));
+            }).catch((error) => {
+                resolve(new ServiceResponse(false, 500, 'Error occured while trying to delete the requested record.', error));
+            });
         });
     }
 }

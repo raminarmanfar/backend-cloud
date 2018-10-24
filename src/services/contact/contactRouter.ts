@@ -31,16 +31,10 @@ export default class ContactRouter {
     }
 
     public update(req: Request, res: Response): void {
-        new ContactController().update(req.params.id, req.body, (status: number, data: any) => res.status(status).json(data));
+        new ContactController().update(req.params.id, req.body).then(result => res.status(result.responseCode).json(result));
     }
 
     public delete(req: Request, res: Response): void {
-        new ContactController().delete(req.params.id, (error: any) => {
-            if(error) {
-                res.status(500).json(error);
-            } else {
-                res.status(204).end();
-            }
-        });
+        new ContactController().delete(req.params.id).then(result => res.status(result.responseCode).json(result));
     }
 }

@@ -4,8 +4,8 @@
     "description": "Backend with mongoose",
     "main": "index.ts",
     "scripts": {
-        "build": "rimraf build && npm i && tsc",
-        "tsc": "tsc",
+        "tsc": "rimraf build && tsc",
+        "build": "npm i && npm run tsc",
         "clean": "rm -rf build node_modules",
         "rebuild": "npm run clean && npm run build",
         "start": "nodemon",
