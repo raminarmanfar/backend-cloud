@@ -1,6 +1,7 @@
 FROM node:10.10.0-jessie
 
-RUN apt-get -y update && apt-get -y install vim
+RUN apt-get -y update
+# && apt-get -y install vim
 
 WORKDIR /usr/src/app
 
