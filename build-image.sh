@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 function get_package_field() {
   cat package.json \
     | grep $1 \
