@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express';
 import UserController from './UserController';
+import { Authentication } from '../Authentication';
 
 export default class UserRouter {
     public router: Router;
@@ -11,15 +12,22 @@ export default class UserRouter {
 
     // set up our routes
     public setRoutes() {
-        this.router.get('/', this.getAllUsers);
+        this.router.post('/login', this.login);
+        this.router.get('/', [Authentication.verifyUserToken, this.getAllUsers]);
         this.router.get('/:username', this.getUserByUsername);
         this.router.post('/', this.create);
         this.router.put('/:username', this.update);
         this.router.delete('/:username', this.delete);
     }
 
+    public login(req: Request, res: Response): void {
+        new UserController().login(req.body.user).then(result => res.status(result.responseCode).json(result));
+    }
+
     public getAllUsers(req: Request, res: Response): void {
-        new UserController().getAll((status:number, data: any) => res.status(status).json(data));
+        new UserController().getAll(req.params.token)
+            .then(result => res.status(result.responseCode).json(result))
+            .catch(error => res.status(error.responseCode).json(error));
     }
 
     public getUserByUsername(req: Request, res: Response): void {

@@ -1,7 +1,8 @@
-import { model, Schema } from 'mongoose';
+import { model, Schema, Types } from 'mongoose';
 
 // tslint:disable object-literal-sort-keys
 const UserSchema: Schema = new Schema({
+  _id: Types.ObjectId,
   createdAt: {
     type: Date,
     default: Date.now
@@ -36,11 +37,13 @@ const UserSchema: Schema = new Schema({
     type: String,
     default: '',
     required: true
-  },
+  }
+  /*,
   posts: [{
     type: Schema.Types.ObjectId,
     ref: 'Post'
   }]
+  */
 });
 
 export default model('User', UserSchema);

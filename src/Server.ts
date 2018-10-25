@@ -6,6 +6,8 @@ import express from 'express';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
 import logger from 'morgan';
+// import bcrypt from 'bcrypt';
+
 import * as path from 'path';
 // import configs
 import config from './config';
