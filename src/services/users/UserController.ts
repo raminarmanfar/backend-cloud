@@ -42,11 +42,23 @@ export default class UserController {
         });
     }
 
-    public getByUsername(username: string, cb: any) {
-        UserModel.findOne({ username }).then((data: any) => {
-            cb(200, data);
-        }).catch((error: any) => {
-            cb(500, error);
+    public getCurrentUser(decodedToken: any): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            UserModel.findOne({ username: decodedToken.user.usernameOrEmail }).then((userInfo: any) => {
+                resolve(new ServiceResponse(true, 200, 'Current user information fetched.', userInfo));
+            }).catch((error: any) => {
+                reject(new ServiceResponse(false, 500, 'Internal error occured whily fetching current user data.', error));
+            });
+        });
+    }
+
+    public getByUsername(username: string): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            UserModel.findOne({ username }).then((userInfo: any) => {
+                resolve(new ServiceResponse(true, 200, 'User information fetched.', userInfo));
+            }).catch((error: any) => {
+                reject(new ServiceResponse(false, 500, 'Internal error occured whily fetching user data.', error));
+            });
         });
     }
 
@@ -62,27 +74,41 @@ export default class UserController {
         });
 
         return new Promise((resolve: any, reject: any) => {
-            userModel.save().then((data: any) => {
-                resolve(new ServiceResponse(true, 200, 'New user has been registered successfully.', data));
+            userModel.save().then((userInfo: any) => {
+                resolve(new ServiceResponse(true, 200, 'New user has been registered successfully.', userInfo));
             }).catch((error: any) => {
                 reject(new ServiceResponse(false, 500, 'Error occured while registering new user.', error));
             });
         });
     }
 
-    public update(username: string, newData: any, cb: any) {
-        UserModel.findOneAndUpdate({ username }, newData).then((data: any) => {
-            cb(200, data);
-        }).catch((error: any) => {
-            cb(500, error);
+    public updateByUsername(username: string, newData: any): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            UserModel.findOneAndUpdate({ username }, newData).then((userInfo: any) => {
+                resolve(new ServiceResponse(true, 200, 'User info has been updated successfully.', userInfo));
+            }).catch((error: any) => {
+                reject(new ServiceResponse(false, 500, 'Error occured while updating the user info.', error));
+            });
+        });
+    }    
+    
+    public updateCurrentUser(decodedToken: any, newData: any): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            UserModel.findOneAndUpdate({ username: decodedToken.user.usernameOrEmail }, newData).then((userInfo: any) => {
+                resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', userInfo));
+            }).catch((error: any) => {
+                reject(new ServiceResponse(false, 500, 'Error occured while updating current user info.', error));
+            });
         });
     }
 
-    public delete(username: string, cb: any) {
-        UserModel.findOneAndRemove({ username }).then(() => {
-            cb(null);
-        }).catch((error: any) => {
-            cb(error);
+    public delete(username: string): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            UserModel.findOneAndRemove({ username }).then(() => {
+                resolve(new ServiceResponse(true, 204, 'User info has been deleted successfully.'));
+            }).catch((error: any) => {
+                reject(new ServiceResponse(false, 500, 'Error occured while deleting the user info.', error));
+            });
         });
     }
 }

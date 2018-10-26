@@ -13,11 +13,13 @@ export default class UserRouter {
     // set up our routes
     public setRoutes() {
         this.router.post('/login', this.login);
-        this.router.get('/', Authentication.verifyUserToken, this.getAllUsers);
-        this.router.get('/:username', this.getUserByUsername);
+        this.router.get('/all', Authentication.verifyUserToken, this.getAllUsers);
+        this.router.get('/current', Authentication.verifyUserToken, this.getCurrentUser);
+        this.router.get('/:username', Authentication.verifyUserToken, this.getUserByUsername);
         this.router.post('/', this.create);
-        this.router.put('/:username', this.update);
-        this.router.delete('/:username', this.delete);
+        this.router.put('/current', Authentication.verifyUserToken, this.updateCurrentUser);
+        this.router.put('/:username', Authentication.verifyUserToken, this.updateByUsername);
+        this.router.delete('/:username', Authentication.verifyUserToken, this.delete);
     }
 
     public login(req: Request, res: Response): void {
@@ -32,27 +34,39 @@ export default class UserRouter {
             .catch(error => res.status(error.statusCode).json(error));
     }
 
-    public getUserByUsername(req: Request, res: Response): void {
-        new UserController().getByUsername(req.params.username, (status:number, data: any) => res.status(status).json(data));
-    }
-
-    public create(req: Request, res: Response): void {
-        new UserController().create(req.body)
+    public getCurrentUser(req: Request, res: Response): void {
+        new UserController().getCurrentUser(req.params.decodedToken)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }
 
-    public update(req: Request, res: Response): void {
-        new UserController().update(req.params.username, req.body, (status: number, data: any) => res.status(status).json(data));
+    public getUserByUsername(req: Request, res: Response): void {
+        new UserController().getByUsername(req.params.username)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
+    }
+
+    public create(req: Request, res: Response): void {
+        new UserController().create(req.body.userInfo)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
+    }
+
+    public updateCurrentUser(req: Request, res: Response): void {
+        new UserController().updateCurrentUser(req.params.decodedToken, req.body.newInfo)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
+    }
+
+    public updateByUsername(req: Request, res: Response): void {
+        new UserController().updateByUsername(req.params.username, req.body.newInfo)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
     }
 
     public delete(req: Request, res: Response): void {
-        new UserController().delete(req.params.username, (error: any) => {
-            if(error) {
-                res.status(500).json(error);
-            } else {
-                res.status(204).end();
-            }
-        });
+        new UserController().delete(req.params.username)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
     }
 }
