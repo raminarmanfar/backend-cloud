@@ -19,22 +19,22 @@ export default class ContactRouter {
     }
 
     public getAllContacts(req: Request, res: Response): void {
-        new ContactController().getAll().then(result => res.status(result.responseCode).json(result));
+        new ContactController().getAll().then(result => res.status(result.statusCode).json(result));
     }
 
     public getContactByContactId(req: Request, res: Response): void {
-        new ContactController().getByContactId(req.params.id).then(result => res.status(result.responseCode).json(result));
+        new ContactController().getByContactId(req.params.id).then(result => res.status(result.statusCode).json(result));
     }
 
     public create(req: Request, res: Response): void {
-        new ContactController().create(req.body).then(result => res.status(result.responseCode).json(result));
+        new ContactController().create(req.body).then(result => res.status(result.statusCode).json(result));
     }
 
     public update(req: Request, res: Response): void {
-        new ContactController().update(req.params.id, req.body).then(result => res.status(result.responseCode).json(result));
+        new ContactController().update(req.params.id, req.body).then(result => res.status(result.statusCode).json(result));
     }
 
     public delete(req: Request, res: Response): void {
-        new ContactController().delete(req.params.id).then(result => res.status(result.responseCode).json(result));
+        new ContactController().delete(req.params.id).then(result => res.status(result.statusCode).json(result));
     }
 }

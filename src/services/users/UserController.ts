@@ -26,7 +26,7 @@ export default class UserController {
                     reject(new ServiceResponse(false, 501, 'User not found.'));
                 }
             });
-            promise.catch(err => reject(new ServiceResponse(false, 501, 'internal error occured.', err)));
+            promise.catch(err => reject(new ServiceResponse(false, 500, 'internal error occured.', err)));
         });
     }
 
@@ -57,7 +57,23 @@ export default class UserController {
             UserModel.findOne({ username }).then((userInfo: any) => {
                 resolve(new ServiceResponse(true, 200, 'User information fetched.', userInfo));
             }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Internal error occured whily fetching user data.', error));
+                reject(new ServiceResponse(false, 500, 'Internal error occured while fetching user data.', error));
+            });
+        });
+    }
+
+    public getIsAvailable(filedName: string, value: string): Promise<ServiceResponse> {
+        let searchObj: any = { username: value };
+        if (filedName === 'email') searchObj = { email: value };
+
+        return new Promise((resolve: any, reject: any) => {
+            UserModel.findOne(searchObj).count().then((count: number) => {
+                if (count === 0)
+                    resolve(new ServiceResponse(true, 200, filedName + ' is Available.', { isAvailable: true }));
+                else
+                    resolve(new ServiceResponse(true, 200, filedName + ' exists.', { isAvailable: false }));
+            }).catch((error: any) => {
+                reject(new ServiceResponse(false, 500, filedName + 'Internal error occured while checking user availability.', error));
             });
         });
     }
@@ -90,8 +106,8 @@ export default class UserController {
                 reject(new ServiceResponse(false, 500, 'Error occured while updating the user info.', error));
             });
         });
-    }    
-    
+    }
+
     public updateCurrentUser(decodedToken: any, newData: any): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
             UserModel.findOneAndUpdate({ username: decodedToken.user.usernameOrEmail }, newData).then((userInfo: any) => {

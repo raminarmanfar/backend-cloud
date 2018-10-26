@@ -16,6 +16,7 @@ export default class UserRouter {
         this.router.get('/all', Authentication.verifyUserToken, this.getAllUsers);
         this.router.get('/current', Authentication.verifyUserToken, this.getCurrentUser);
         this.router.get('/:username', Authentication.verifyUserToken, this.getUserByUsername);
+        this.router.get('/available/:fieldName/:value', this.getIsAvailable);
         this.router.post('/', this.create);
         this.router.put('/current', Authentication.verifyUserToken, this.updateCurrentUser);
         this.router.put('/:username', Authentication.verifyUserToken, this.updateByUsername);
@@ -23,7 +24,7 @@ export default class UserRouter {
     }
 
     public login(req: Request, res: Response): void {
-        new UserController().login(req.body.user)
+        new UserController().login(req.body)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }
@@ -46,8 +47,14 @@ export default class UserRouter {
             .catch(error => res.status(error.statusCode).json(error));
     }
 
+    public getIsAvailable(req: Request, res: Response): void {
+        new UserController().getIsAvailable(req.params.fieldName, req.params.value)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
+    }
+
     public create(req: Request, res: Response): void {
-        new UserController().create(req.body.userInfo)
+        new UserController().create(req.body)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }
