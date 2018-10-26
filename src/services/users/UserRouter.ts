@@ -13,7 +13,7 @@ export default class UserRouter {
     // set up our routes
     public setRoutes() {
         this.router.post('/login', this.login);
-        this.router.get('/', [Authentication.verifyUserToken, this.getAllUsers]);
+        this.router.get('/', Authentication.verifyUserToken, this.getAllUsers);
         this.router.get('/:username', this.getUserByUsername);
         this.router.post('/', this.create);
         this.router.put('/:username', this.update);
@@ -21,13 +21,15 @@ export default class UserRouter {
     }
 
     public login(req: Request, res: Response): void {
-        new UserController().login(req.body.user).then(result => res.status(result.responseCode).json(result));
+        new UserController().login(req.body.user)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
     }
 
     public getAllUsers(req: Request, res: Response): void {
-        new UserController().getAll(req.params.token)
-            .then(result => res.status(result.responseCode).json(result))
-            .catch(error => res.status(error.responseCode).json(error));
+        new UserController().getAll()
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
     }
 
     public getUserByUsername(req: Request, res: Response): void {
@@ -35,7 +37,9 @@ export default class UserRouter {
     }
 
     public create(req: Request, res: Response): void {
-        new UserController().create(req.body, (status: number, data: any) => res.status(status).json(data));
+        new UserController().create(req.body)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
     }
 
     public update(req: Request, res: Response): void {
