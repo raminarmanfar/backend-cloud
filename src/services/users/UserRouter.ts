@@ -60,7 +60,7 @@ export default class UserRouter {
     }
 
     public updateCurrentUser(req: Request, res: Response): void {
-        new UserController().updateCurrentUser(req.params.decodedToken, req.body.newInfo)
+        new UserController().updateCurrentUser(req.params.decodedToken, req.params.token, req.body)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }

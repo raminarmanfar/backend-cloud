@@ -108,10 +108,14 @@ export default class UserController {
         });
     }
 
-    public updateCurrentUser(decodedToken: any, newData: any): Promise<ServiceResponse> {
+    public updateCurrentUser(decodedToken: any, token: string, newData: any): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
             UserModel.findOneAndUpdate({ username: decodedToken.user.usernameOrEmail }, newData).then((userInfo: any) => {
-                resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', userInfo));
+                UserModel.findById(userInfo._id).then(updatedUserInfo => {
+                    const dataToSend = { userInfo: updatedUserInfo, token };
+                    console.log(dataToSend);
+                    resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend));
+                });
             }).catch((error: any) => {
                 reject(new ServiceResponse(false, 500, 'Error occured while updating current user info.', error));
             });

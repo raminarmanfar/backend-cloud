@@ -13,6 +13,7 @@ export class Authentication {
                     return res.status(403).json(new ServiceResponse(false, 403, 'Unauthorized request!'));
                 } else if(decodedToken) {
                     req.params.decodedToken = decodedToken;
+                    req.params.token = token;
                 }
             });
             return next();
