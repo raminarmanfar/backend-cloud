@@ -16,7 +16,7 @@ export default class UserController {
                             if (err) {
                                 reject(new ServiceResponse(false, 500, 'Error on token generation.', err));
                             } else {
-                                resolve(new ServiceResponse(true, 200, 'Token generated successfully.', { token }));
+                                resolve(new ServiceResponse(true, 200, 'Token generated successfully.', { userInfo: doc, token }));
                             }
                         });
                     } else {
