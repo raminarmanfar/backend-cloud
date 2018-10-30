@@ -2,6 +2,7 @@ import { ServiceResponse } from "../../models/ServiceResponse";
 import { Promise } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import UserModel from "./UserModel";
+import { resolve } from "path";
 const UserModels = require("./UserModel");
 
 export default class UserController {
@@ -74,6 +75,23 @@ export default class UserController {
                     resolve(new ServiceResponse(true, 200, filedName + ' exists.', { isAvailable: false }));
             }).catch((error: any) => {
                 reject(new ServiceResponse(false, 500, filedName + 'Internal error occured while checking user availability.', error));
+            });
+        });
+    }
+
+    public changePassword(username: string, password: string): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            UserModel.findOne({ username: username }).then((result: any) => {
+                if (!result.isValid(password)) {
+                    resolve(new ServiceResponse(false, 200, 'Password is NOT valid.', { isPassValid: false }));
+                } else {
+                    UserModel.findOneAndUpdate({ username: username }, { password: password }).then((result: any) => {
+                        console.log(result);
+                        resolve(new ServiceResponse(true, 200, 'Password has been changed successfully.', { isPassValid: true, result }));
+                    }).catch(error => {
+                        reject(new ServiceResponse(false, 500, 'Internam error occured.', error));
+                    });
+                }
             });
         });
     }

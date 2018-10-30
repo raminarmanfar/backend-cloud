@@ -17,6 +17,7 @@ export default class UserRouter {
         this.router.get('/current', Authentication.verifyUserToken, this.getCurrentUser);
         this.router.get('/:username', Authentication.verifyUserToken, this.getUserByUsername);
         this.router.get('/available/:fieldName/:value', this.getIsAvailable);
+        this.router.post('/change-password', Authentication.verifyUserToken, this.changePassword);
         this.router.post('/', this.create);
         this.router.put('/current', Authentication.verifyUserToken, this.updateCurrentUser);
         this.router.put('/:username', Authentication.verifyUserToken, this.updateByUsername);
@@ -49,6 +50,12 @@ export default class UserRouter {
 
     public getIsAvailable(req: Request, res: Response): void {
         new UserController().getIsAvailable(req.params.fieldName, req.params.value)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
+    }
+
+    public changePassword(req: Request, res: Response): void {
+        new UserController().changePassword(req.body.username, req.body.password)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }
