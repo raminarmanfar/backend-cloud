@@ -15,16 +15,16 @@ export default class UserController {
                     if (doc.isValid(user.password)) {
                         jwt.sign({ user }, 'secretkey', (err: any, token: any) => {
                             if (err) {
-                                reject(new ServiceResponse(false, 500, 'Error on token generation.', err));
+                                reject(new ServiceResponse(false, 200, 'Error on token generation.', err));
                             } else {
                                 resolve(new ServiceResponse(true, 200, 'Token generated successfully.', { userInfo: doc, token }));
                             }
                         });
                     } else {
-                        reject(new ServiceResponse(false, 501, 'Invalid credentials entered.'));
+                        reject(new ServiceResponse(false, 200, 'Invalid credentials entered.'));
                     }
                 } else {
-                    reject(new ServiceResponse(false, 501, 'User not found.'));
+                    reject(new ServiceResponse(false, 200, 'User not found.'));
                 }
             });
             promise.catch(err => reject(new ServiceResponse(false, 500, 'internal error occured.', err)));
@@ -79,14 +79,13 @@ export default class UserController {
         });
     }
 
-    public changePassword(username: string, password: string): Promise<ServiceResponse> {
+    public changePassword(username: string, currentPassword: string, newPassword: string): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
             UserModel.findOne({ username: username }).then((result: any) => {
-                if (!result.isValid(password)) {
+                if (!result.isValid(currentPassword)) {
                     resolve(new ServiceResponse(false, 200, 'Password is NOT valid.', { isPassValid: false }));
                 } else {
-                    UserModel.findOneAndUpdate({ username: username }, { password: password }).then((result: any) => {
-                        console.log(result);
+                    UserModel.findOneAndUpdate({ username: username }, { password: UserModels.hashPassword(newPassword), }).then((result: any) => {
                         resolve(new ServiceResponse(true, 200, 'Password has been changed successfully.', { isPassValid: true, result }));
                     }).catch(error => {
                         reject(new ServiceResponse(false, 500, 'Internam error occured.', error));
@@ -140,7 +139,17 @@ export default class UserController {
         });
     }
 
-    public delete(username: string): Promise<ServiceResponse> {
+    public deleteAll(): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            UserModel.deleteMany({}).then(() => {
+                resolve(new ServiceResponse(true, 204, 'All users have been deleted successfully.'));
+            }).catch((error: any) => {
+                reject(new ServiceResponse(false, 500, 'Error occured while deleting all users info.', error));
+            });
+        });
+    }
+
+    public deleteByUsername(username: string): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
             UserModel.findOneAndRemove({ username }).then(() => {
                 resolve(new ServiceResponse(true, 204, 'User info has been deleted successfully.'));

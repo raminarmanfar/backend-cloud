@@ -21,7 +21,8 @@ export default class UserRouter {
         this.router.post('/', this.create);
         this.router.put('/current', Authentication.verifyUserToken, this.updateCurrentUser);
         this.router.put('/:username', Authentication.verifyUserToken, this.updateByUsername);
-        this.router.delete('/:username', Authentication.verifyUserToken, this.delete);
+        this.router.delete('/all', Authentication.verifyUserToken, this.deleteAll);
+        this.router.delete('/:username', Authentication.verifyUserToken, this.deleteByUsername);
     }
 
     public login(req: Request, res: Response): void {
@@ -55,7 +56,7 @@ export default class UserRouter {
     }
 
     public changePassword(req: Request, res: Response): void {
-        new UserController().changePassword(req.body.username, req.body.password)
+        new UserController().changePassword(req.body.username, req.body.currentPassword, req.body.newPassword)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }
@@ -78,8 +79,14 @@ export default class UserRouter {
             .catch(error => res.status(error.statusCode).json(error));
     }
 
-    public delete(req: Request, res: Response): void {
-        new UserController().delete(req.params.username)
+    public deleteAll(req: Request, res: Response): void {
+        new UserController().deleteAll()
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
+    }
+
+    public deleteByUsername(req: Request, res: Response): void {
+        new UserController().deleteByUsername(req.params.username)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }
