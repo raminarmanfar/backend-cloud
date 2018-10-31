@@ -45,10 +45,11 @@ export default class UserController {
 
     public getCurrentUser(decodedToken: any): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
-            UserModel.findOne({ username: decodedToken.user.usernameOrEmail }).then((userInfo: any) => {
+            UserModel.findOne({ username: decodedToken.user.usernameOrEmail })
+            .then((userInfo: any) => {
                 resolve(new ServiceResponse(true, 200, 'Current user information fetched.', userInfo));
             }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Internal error occured whily fetching current user data.', error));
+                reject(new ServiceResponse(false, 500, 'Internal error occured.', error));
             });
         });
     }
@@ -58,7 +59,7 @@ export default class UserController {
             UserModel.findOne({ username }).then((userInfo: any) => {
                 resolve(new ServiceResponse(true, 200, 'User information fetched.', userInfo));
             }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Internal error occured while fetching user data.', error));
+                reject(new ServiceResponse(false, 500, 'Internal error occured.', error));
             });
         });
     }
@@ -74,7 +75,7 @@ export default class UserController {
                 else
                     resolve(new ServiceResponse(true, 200, filedName + ' exists.', { isAvailable: false }));
             }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, filedName + 'Internal error occured while checking user availability.', error));
+                reject(new ServiceResponse(false, 500, filedName + 'Internal error occured.', error));
             });
         });
     }
@@ -88,7 +89,7 @@ export default class UserController {
                     UserModel.findOneAndUpdate({ username: username }, { password: UserModels.hashPassword(newPassword), }).then((result: any) => {
                         resolve(new ServiceResponse(true, 200, 'Password has been changed successfully.', { isPassValid: true, result }));
                     }).catch(error => {
-                        reject(new ServiceResponse(false, 500, 'Internam error occured.', error));
+                        reject(new ServiceResponse(false, 500, 'Internal error occured.', error));
                     });
                 }
             });
@@ -110,7 +111,7 @@ export default class UserController {
             userModel.save().then((userInfo: any) => {
                 resolve(new ServiceResponse(true, 200, 'New user has been registered successfully.', userInfo));
             }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Error occured while registering new user.', error));
+                reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
         });
     }
@@ -120,7 +121,7 @@ export default class UserController {
             UserModel.findOneAndUpdate({ username }, newData).then((userInfo: any) => {
                 resolve(new ServiceResponse(true, 200, 'User info has been updated successfully.', userInfo));
             }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Error occured while updating the user info.', error));
+                reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
         });
     }
@@ -134,7 +135,7 @@ export default class UserController {
                     resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend));
                 });
             }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Error occured while updating current user info.', error));
+                reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
         });
     }
@@ -144,7 +145,7 @@ export default class UserController {
             UserModel.deleteMany({}).then(() => {
                 resolve(new ServiceResponse(true, 204, 'All users have been deleted successfully.'));
             }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Error occured while deleting all users info.', error));
+                reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
         });
     }
@@ -154,7 +155,7 @@ export default class UserController {
             UserModel.findOneAndRemove({ username }).then(() => {
                 resolve(new ServiceResponse(true, 204, 'User info has been deleted successfully.'));
             }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Error occured while deleting the user info.', error));
+                reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
         });
     }
