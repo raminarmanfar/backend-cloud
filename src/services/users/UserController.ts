@@ -69,7 +69,7 @@ export default class UserController {
         if (filedName === 'email') searchObj = { email: value };
 
         return new Promise((resolve: any, reject: any) => {
-            UserModel.findOne(searchObj).count().then((count: number) => {
+            UserModel.findOne(searchObj).countDocuments().then((count: number) => {
                 if (count === 0)
                     resolve(new ServiceResponse(true, 200, filedName + ' is Available.', { isAvailable: true }));
                 else
