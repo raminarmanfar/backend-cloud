@@ -13,6 +13,7 @@ const UserSchema: Schema = new Schema({
   username: { type: String, default: '', required: true, unique: true, lowercase: true },
   password: { type: String, default: '', required: true },
   role: { type: UserRoleEnum, default: UserRoleEnum.User, required: true },
+  imageName: { type: String, default: '' }
   // posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }]
 });
 

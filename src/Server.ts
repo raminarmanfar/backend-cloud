@@ -8,7 +8,6 @@ import mongoose from 'mongoose';
 import logger from 'morgan';
 // import bcrypt from 'bcrypt';
 
-import * as path from 'path';
 // import configs
 import config from './config';
 // import routers
@@ -16,9 +15,22 @@ import UserRouter from './services/users/UserRouter';
 import PostRouter from './services/posts/PostRouter';
 import ContactRouter from './services/contact/contactRouter';
 
+import multer from 'multer';
+import * as path from 'path';
+
 export default class Server {
   // set app to be of type express.Application
   public app: express.Application;
+
+  storage = multer.diskStorage({
+    destination: (req: Express.Request, file: Express.Multer.File, cb: any) => {
+      cb(null, config.fileStorage.dir);
+    },
+    filename: (req: Express.Request, file: Express.Multer.File, cb: any) => {
+      cb(null, file.fieldname + '-' + Date.now() + '.' + path.extname(file.originalname));
+    }
+  });
+  upload = multer({ storage: this.storage });
 
   constructor() {
     this.app = express();
@@ -41,15 +53,13 @@ export default class Server {
     this.app.use(compression());
     this.app.use(helmet());
     this.app.use(cors());
-
-    // // cors
-    // this.app.use((req, res, next) => {
-    //   res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
-    //   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    //   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Control-Allow-Credentials');
-    //   res.header('Access-Control-Allow-Credentials', 'true');
-    //   next();
-    // });    
+    this.app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Control-Allow-Credentials');
+      res.header('Access-Control-Allow-Credentials', 'true');
+      next();
+    });
   }
 
   // application routes
@@ -57,7 +67,7 @@ export default class Server {
     const router: express.Router = express.Router();
 
     this.app.use('/', router);
-    this.app.use('/api/users', new UserRouter().router);
+    this.app.use('/api/users', new UserRouter(this.upload).router);
     this.app.use('/api/posts', new PostRouter().router);
     this.app.use('/api/contacts', new ContactRouter().router);
   }
@@ -68,7 +78,7 @@ export default class Server {
 
     // Connect to mongoDB
     (mongoose as any).Promise = global.Promise;
-    mongoose.set('useCreateIndex', true);    
+    mongoose.set('useCreateIndex', true);
     if (config.mongoDB.user && config.mongoDB.password) {
       console.log("Authentication should be enabled.");
       mongoose.connect(MONGO_URI, { user: config.mongoDB.user, pass: config.mongoDB.password, useNewUrlParser: true });
@@ -89,3 +99,4 @@ export default class Server {
     this.app.listen(config.http.port, () => console.log(`Server started on port ${config.http.port}!`));
   }
 }
+

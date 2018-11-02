@@ -2,7 +2,6 @@ import { ServiceResponse } from "../../models/ServiceResponse";
 import { Promise } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import UserModel from "./UserModel";
-import { resolve } from "path";
 const UserModels = require("./UserModel");
 
 export default class UserController {
@@ -104,7 +103,8 @@ export default class UserController {
             phone: userInfo.phone,
             username: userInfo.username,
             password: UserModels.hashPassword(userInfo.password),
-            role: userInfo.role
+            role: userInfo.role,
+            imageName: userInfo.imageName
         });
 
         return new Promise((resolve: any, reject: any) => {
@@ -151,6 +151,16 @@ export default class UserController {
     }
 
     public deleteByUsername(username: string): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            UserModel.findOneAndRemove({ username }).then(() => {
+                resolve(new ServiceResponse(true, 204, 'User info has been deleted successfully.'));
+            }).catch((error: any) => {
+                reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
+            });
+        });
+    }
+
+    public uploadImage(username: string): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
             UserModel.findOneAndRemove({ username }).then(() => {
                 resolve(new ServiceResponse(true, 204, 'User info has been deleted successfully.'));

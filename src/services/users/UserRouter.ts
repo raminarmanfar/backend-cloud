@@ -1,11 +1,12 @@
 import { Request, Response, Router } from 'express';
 import UserController from './UserController';
 import { Authentication } from '../Authentication';
+import multer from 'multer';
 
 export default class UserRouter {
     public router: Router;
 
-    constructor() {
+    constructor(private upload: multer.Instance) {
         this.router = Router();
         this.setRoutes();
     }
@@ -18,11 +19,14 @@ export default class UserRouter {
         this.router.get('/:username', Authentication.verifyUserToken, this.getUserByUsername);
         this.router.get('/available/:fieldName/:value', this.getIsAvailable);
         this.router.post('/change-password', Authentication.verifyUserToken, this.changePassword);
-        this.router.post('/', this.create);
+        this.router.post('/', this.upload.single('photo'), this.create);
         this.router.put('/current', Authentication.verifyUserToken, this.updateCurrentUser);
         this.router.put('/:username', Authentication.verifyUserToken, this.updateByUsername);
         this.router.delete('/all', Authentication.verifyUserToken, this.deleteAll);
         this.router.delete('/:username', Authentication.verifyUserToken, this.deleteByUsername);
+
+        // this.router.post('/upload-image', this.upload.single('photo'), Authentication.verifyUserToken, this.uploadImage);
+        this.router.post('/upload-image', this.upload.single('photo'), this.uploadImage);
     }
 
     public login(req: Request, res: Response): void {
@@ -87,6 +91,12 @@ export default class UserRouter {
 
     public deleteByUsername(req: Request, res: Response): void {
         new UserController().deleteByUsername(req.params.username)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
+    }
+
+    public uploadImage(req: Request, res: Response): void {
+        new UserController().uploadImage(req.params.username)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }

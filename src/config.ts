@@ -1,6 +1,14 @@
 export default {
   http: {
+    host: process.env.host || 'localhost',
     port: process.env.PORT || 5000
+  },
+  client: {
+    host: process.env.host || 'localhost',
+    port: process.env.PORT || 4200
+  },
+  fileStorage: {
+    dir: './uploads'
   },
   mongoDB: {
     url: process.env.MONGODB_URL || "localhost",
