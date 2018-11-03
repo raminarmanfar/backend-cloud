@@ -1,7 +1,9 @@
+import { resolve } from 'path';
 import { ServiceResponse } from "../../models/ServiceResponse";
 import { Promise } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import UserModel from "./UserModel";
+import * as FileOperations from '../../FileOperations';
 import config from "../../config";
 const UserModels = require("./UserModel");
 
@@ -46,11 +48,11 @@ export default class UserController {
     public getCurrentUser(decodedToken: any): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
             UserModel.findOne({ username: decodedToken.user.usernameOrEmail })
-            .then((userInfo: any) => {
-                resolve(new ServiceResponse(true, 200, 'Current user information fetched.', userInfo));
-            }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Internal error occured.', error));
-            });
+                .then((userInfo: any) => {
+                    resolve(new ServiceResponse(true, 200, 'Current user information fetched.', userInfo));
+                }).catch((error: any) => {
+                    reject(new ServiceResponse(false, 500, 'Internal error occured.', error));
+                });
         });
     }
 
@@ -105,7 +107,7 @@ export default class UserController {
             username: userInfo.username,
             password: UserModels.hashPassword(userInfo.password),
             role: userInfo.role,
-            imageName: config.services.users + '/image/' +  file.filename
+            imageUrl: config.services.users + '/image/' + file.filename
         });
 
         return new Promise((resolve: any, reject: any) => {
@@ -169,4 +171,15 @@ export default class UserController {
             });
         });
     }
+
+    public provideImage(imageUrl: string): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            let imagePath = config.files.usersProfileImages + imageUrl;
+            //Check first if the image exist
+            FileOperations.fileStat(imagePath)
+                .then(data => resolve(new ServiceResponse(true, 200, 'image fetched.', { data, imagePath })))
+                .catch(error => reject(new ServiceResponse(false, 500, 'No image found.', error)));
+        });
+    }
+
 }

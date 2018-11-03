@@ -8,6 +8,9 @@ export default {
     posts: '/api/posts',
     contacts: '/api/contacts'
   },
+  files: {
+    usersProfileImages: 'uploads/profileImages/',
+  },
   client: {
     host: process.env.host || 'localhost',
     port: process.env.PORT || 4200

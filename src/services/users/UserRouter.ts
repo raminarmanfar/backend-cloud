@@ -2,7 +2,6 @@ import { Request, Response, Router } from 'express';
 import UserController from './UserController';
 import { Authentication } from '../Authentication';
 import multer from 'multer';
-import config from '../../config';
 
 // const uploadMicroservicesImages = multer({ dest: `${config.fileStorage.usersProfileImageUrl}` });
 export default class UserRouter {
@@ -18,7 +17,7 @@ export default class UserRouter {
     });
     private upload: multer.Instance = multer({ storage: this.storage });
     */
-    
+
     constructor(private uploader: multer.Instance) {
         this.router = Router();
         this.setRoutes();
@@ -37,9 +36,8 @@ export default class UserRouter {
         this.router.put('/:username', Authentication.verifyUserToken, this.updateByUsername);
         this.router.delete('/all', Authentication.verifyUserToken, this.deleteAll);
         this.router.delete('/:username', Authentication.verifyUserToken, this.deleteByUsername);
-
-        // this.router.post('/upload-image', this.upload.single('photo'), Authentication.verifyUserToken, this.uploadImage);
-        this.router.post('/upload-image', this.uploader.single('photo'), this.uploadImage);
+        this.router.get('/image/:imageUrl', this.provideImage);
+        // this.router.post('/upload-image', this.uploader.single('photo'), this.uploadImage);
     }
 
     public login(req: Request, res: Response): void {
@@ -111,6 +109,12 @@ export default class UserRouter {
     public uploadImage(req: Request, res: Response): void {
         new UserController().uploadImage(req.params.username)
             .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
+    }
+
+    public provideImage(req: Request, res: Response): void {
+        new UserController().provideImage(req.params.imageUrl)
+            .then(result => res.status(result.statusCode).download(result.data.imagePath))
             .catch(error => res.status(error.statusCode).json(error));
     }
 }
