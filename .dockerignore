@@ -1,6 +1,5 @@
 node_modules
 build
-my-cloud-manager
 *.sh
 *.md
 .git
