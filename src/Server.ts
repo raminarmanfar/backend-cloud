@@ -6,6 +6,7 @@ import express from 'express';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
 import logger from 'morgan';
+import crypto from 'crypto';
 // import bcrypt from 'bcrypt';
 
 // import configs
@@ -22,15 +23,19 @@ export default class Server {
   // set app to be of type express.Application
   public app: express.Application;
 
-  storage = multer.diskStorage({
+  /**/
+  private storage = multer.diskStorage({
     destination: (req: Express.Request, file: Express.Multer.File, cb: any) => {
-      cb(null, config.fileStorage.dir);
+      cb(null, config.fileStorage.usersProfileImageUrl);
     },
     filename: (req: Express.Request, file: Express.Multer.File, cb: any) => {
-      cb(null, file.fieldname + '-' + Date.now() + '.' + path.extname(file.originalname));
+      crypto.randomBytes(16, (err: any, raw: any) => {
+        cb(null, raw.toString('hex') + Date.now() + path.extname(file.originalname));
+      });
     }
   });
-  upload = multer({ storage: this.storage });
+  private uploader = multer({ storage: this.storage });
+  /**/
 
   constructor() {
     this.app = express();
@@ -67,9 +72,9 @@ export default class Server {
     const router: express.Router = express.Router();
 
     this.app.use('/', router);
-    this.app.use('/api/users', new UserRouter(this.upload).router);
-    this.app.use('/api/posts', new PostRouter().router);
-    this.app.use('/api/contacts', new ContactRouter().router);
+    this.app.use(config.services.users, new UserRouter(this.uploader).router);
+    this.app.use(config.services.posts, new PostRouter().router);
+    this.app.use(config.services.contacts, new ContactRouter().router);
   }
 
   public start() {

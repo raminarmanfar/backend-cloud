@@ -3,12 +3,17 @@ export default {
     host: process.env.host || 'localhost',
     port: process.env.PORT || 5000
   },
+  services: {
+    users: '/api/users',
+    posts: '/api/posts',
+    contacts: '/api/contacts'
+  },
   client: {
     host: process.env.host || 'localhost',
     port: process.env.PORT || 4200
   },
   fileStorage: {
-    dir: './uploads'
+    usersProfileImageUrl: 'uploads/profileImages/'
   },
   mongoDB: {
     url: process.env.MONGODB_URL || "localhost",

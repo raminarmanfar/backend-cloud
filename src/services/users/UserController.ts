@@ -2,6 +2,7 @@ import { ServiceResponse } from "../../models/ServiceResponse";
 import { Promise } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import UserModel from "./UserModel";
+import config from "../../config";
 const UserModels = require("./UserModel");
 
 export default class UserController {
@@ -95,7 +96,7 @@ export default class UserController {
         });
     }
 
-    public create(userInfo: any): Promise<ServiceResponse> {
+    public create(userInfo: any, file: any): Promise<ServiceResponse> {
         const userModel = new UserModel({
             firstName: userInfo.firstName,
             lastName: userInfo.lastName,
@@ -104,12 +105,12 @@ export default class UserController {
             username: userInfo.username,
             password: UserModels.hashPassword(userInfo.password),
             role: userInfo.role,
-            imageName: userInfo.imageName
+            imageName: config.services.users + '/image/' +  file.filename
         });
 
         return new Promise((resolve: any, reject: any) => {
             userModel.save().then((userInfo: any) => {
-                resolve(new ServiceResponse(true, 200, 'New user has been registered successfully.', userInfo));
+                resolve(new ServiceResponse(true, 200, 'New user has been registered successfully.', userModel));
             }).catch((error: any) => {
                 reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
@@ -131,7 +132,6 @@ export default class UserController {
             UserModel.findOneAndUpdate({ username: decodedToken.user.usernameOrEmail }, newData).then((userInfo: any) => {
                 UserModel.findById(userInfo._id).then(updatedUserInfo => {
                     const dataToSend = { userInfo: updatedUserInfo, token };
-                    console.log(dataToSend);
                     resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend));
                 });
             }).catch((error: any) => {
