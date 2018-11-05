@@ -6,6 +6,7 @@ import UserModel from "./UserModel";
 import * as FileOperations from '../../FileOperations';
 import config from "../../config";
 const UserModels = require("./UserModel");
+import rimraf from 'rimraf';
 
 export default class UserController {
     public login(user: any): Promise<ServiceResponse> {
@@ -145,7 +146,9 @@ export default class UserController {
     public deleteAll(): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
             UserModel.deleteMany({}).then(() => {
-                resolve(new ServiceResponse(true, 204, 'All users have been deleted successfully.'));
+                rimraf(config.files.usersProfileImages + '*', () => {
+                    resolve(new ServiceResponse(true, 204, 'All users have been deleted successfully.'));
+                });
             }).catch((error: any) => {
                 reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
@@ -154,8 +157,17 @@ export default class UserController {
 
     public deleteByUsername(username: string): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
-            UserModel.findOneAndRemove({ username }).then(() => {
-                resolve(new ServiceResponse(true, 204, 'User info has been deleted successfully.'));
+            UserModel.findOneAndRemove({ username }).then((result: any) => {
+                console.log(result);
+                let imageName: string = result.imageUrl;
+                imageName = imageName.substring(imageName.lastIndexOf('/') + 1);
+                console.log(imageName);
+                FileOperations.deleteFile(config.files.usersProfileImages + imageName).then(() => {
+                    resolve(new ServiceResponse(true, 204, 'User info has been deleted successfully.'));
+                })
+                .catch(error => {
+                    reject(new ServiceResponse(false, 500, error.message, error));    
+                });
             }).catch((error: any) => {
                 reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
