@@ -24,8 +24,6 @@ export class Authentication {
 
     public static verifyAdminToken(req: Request, res: Response, next: NextFunction) {
         const token: string = req.query.token || req.headers['x-access-token'];
-        console.log(req.params)
-
         UserModel.findById(req.params.userId)
             .then((foundUser: any) => {
                 if (foundUser.role === 'admin') {

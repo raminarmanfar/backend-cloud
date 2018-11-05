@@ -68,7 +68,6 @@ export default class UserController {
     }
 
     public getIsAvailable(filedName: string, value: string): Promise<ServiceResponse> {
-        console.log(filedName);
         if (filedName === 'username' && value === 'rootadmin') {
             return new Promise((resolve: any) => {
                 resolve(new ServiceResponse(false, 200, filedName + ' not allowed to be used.', { isAvailable: false }));
@@ -180,10 +179,8 @@ export default class UserController {
     public deleteByUsername(username: string): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
             UserModel.findOneAndRemove({ username }).then((result: any) => {
-                console.log(result);
                 let imageName: string = result.imageUrl;
                 imageName = imageName.substring(imageName.lastIndexOf('/') + 1);
-                console.log(imageName);
                 FileOperations.deleteFile(config.files.usersProfileImages + imageName).then(() => {
                     resolve(new ServiceResponse(true, 204, 'User info has been deleted successfully.'));
                 })
@@ -209,7 +206,6 @@ export default class UserController {
     public provideImage(imageName: string): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
             const imageUrl = (imageName === config.defaultProfileImage.imageName ? config.defaultProfileImage.path : config.files.usersProfileImages) + imageName;
-            console.log('image url:', imageUrl, imageName);
             //Check first if the image exist
             FileOperations.fileStat(imageUrl)
                 .then(data => resolve(new ServiceResponse(true, 200, 'Image fetched.', { data, imageUrl })))

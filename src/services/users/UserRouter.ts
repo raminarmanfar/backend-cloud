@@ -33,7 +33,7 @@ export default class UserRouter {
         this.router.get('/available/:fieldName/:value', this.getIsAvailable);
         this.router.post('/change-password', Authentication.verifyUserToken, this.changePassword);
         this.router.post('/', this.uploader.single('photo'), this.createOrdinaryUser);
-        this.router.post('/createAdminUser/:userId', this.uploader.single('photo'), this.createAdminUser);
+        this.router.post('/createAdminUser/:userId', Authentication.verifyAdminToken, this.uploader.single('photo'), this.createAdminUser);
         this.router.put('/current', Authentication.verifyUserToken, this.updateCurrentUser);
         this.router.put('/:username', Authentication.verifyUserToken, this.updateByUsername);
         this.router.delete('/all', Authentication.verifyUserToken, this.deleteAll);
