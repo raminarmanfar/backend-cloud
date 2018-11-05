@@ -141,19 +141,42 @@ export default class UserController {
         });
     }
 
-    public updateByUsername(username: string, newData: any): Promise<ServiceResponse> {
+    public updateByUsername(username: string, token: string, newData: any, file: any): Promise<ServiceResponse> {
+        const imageUrl: string = file ? config.services.users + '/image/' + file.filename : newData.oldImageUrl;
+        const userModel = {
+            firstName: newData.firstName,
+            lastName: newData.lastName,
+            email: newData.email,
+            phone: newData.phone,
+            username: newData.username,
+            imageUrl: imageUrl
+        };
+
         return new Promise((resolve: any, reject: any) => {
-            UserModel.findOneAndUpdate({ username }, newData).then((userInfo: any) => {
-                resolve(new ServiceResponse(true, 200, 'User info has been updated successfully.', userInfo));
+            UserModel.findOneAndUpdate({ username }, userModel).then((userInfo: any) => {
+                UserModel.findById(userInfo._id).then(updatedUserInfo => {
+                    const dataToSend = { userInfo: updatedUserInfo, token };
+                    resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend));
+                });
             }).catch((error: any) => {
                 reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
         });
     }
 
-    public updateCurrentUser(decodedToken: any, token: string, newData: any): Promise<ServiceResponse> {
+    public updateCurrentUser(decodedToken: any, token: string, newData: any, file: any): Promise<ServiceResponse> {
+        const imageUrl: string = file ? config.services.users + '/image/' + file.filename : newData.oldImageUrl;
+        const userModel = {
+            firstName: newData.firstName,
+            lastName: newData.lastName,
+            email: newData.email,
+            phone: newData.phone,
+            username: newData.username,
+            imageUrl: imageUrl
+        };
+
         return new Promise((resolve: any, reject: any) => {
-            UserModel.findOneAndUpdate({ username: decodedToken.user.usernameOrEmail }, newData).then((userInfo: any) => {
+            UserModel.findOneAndUpdate({ username: decodedToken.user.usernameOrEmail }, userModel).then((userInfo: any) => {
                 UserModel.findById(userInfo._id).then(updatedUserInfo => {
                     const dataToSend = { userInfo: updatedUserInfo, token };
                     resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend));

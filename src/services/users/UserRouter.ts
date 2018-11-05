@@ -34,7 +34,7 @@ export default class UserRouter {
         this.router.post('/change-password', Authentication.verifyUserToken, this.changePassword);
         this.router.post('/', this.uploader.single('photo'), this.createOrdinaryUser);
         this.router.post('/createAdminUser/:userId', Authentication.verifyAdminToken, this.uploader.single('photo'), this.createAdminUser);
-        this.router.put('/current', Authentication.verifyUserToken, this.updateCurrentUser);
+        this.router.put('/current', this.uploader.single('photo'), Authentication.verifyUserToken, this.updateCurrentUser);
         this.router.put('/:username', Authentication.verifyUserToken, this.updateByUsername);
         this.router.delete('/all', Authentication.verifyUserToken, this.deleteAll);
         this.router.delete('/:username', Authentication.verifyUserToken, this.deleteByUsername);
@@ -90,14 +90,14 @@ export default class UserRouter {
             .catch(error => res.status(error.statusCode).json(error));
     }
 
-    public updateCurrentUser(req: Request, res: Response): void {
-        new UserController().updateCurrentUser(req.params.decodedToken, req.params.token, req.body)
+    public updateByUsername(req: Request, res: Response): void {
+        new UserController().updateByUsername(req.params.username, req.params.token, req.body, req.file)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }
 
-    public updateByUsername(req: Request, res: Response): void {
-        new UserController().updateByUsername(req.params.username, req.body.newInfo)
+    public updateCurrentUser(req: Request, res: Response): void {
+        new UserController().updateCurrentUser(req.params.decodedToken, req.params.token, req.body, req.file)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }
