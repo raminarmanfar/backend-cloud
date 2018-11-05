@@ -1,11 +1,11 @@
-import { resolve } from 'path';
-import { ServiceResponse } from "../../models/ServiceResponse";
+import { UserRoleEnum } from '../../models/enums/UserRoleEnum';
+import { ServiceResponse } from '../../models/ServiceResponse';
 import { Promise } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import UserModel from "./UserModel";
 import * as FileOperations from '../../FileOperations';
 import config from "../../config";
-const UserModels = require("./UserModel");
+const UserModels = require('./UserModel');
 import rimraf from 'rimraf';
 
 export default class UserController {
@@ -68,19 +68,24 @@ export default class UserController {
     }
 
     public getIsAvailable(filedName: string, value: string): Promise<ServiceResponse> {
-        let searchObj: any = { username: value };
-        if (filedName === 'email') searchObj = { email: value };
-
-        return new Promise((resolve: any, reject: any) => {
-            UserModel.findOne(searchObj).countDocuments().then((count: number) => {
-                if (count === 0)
-                    resolve(new ServiceResponse(true, 200, filedName + ' is Available.', { isAvailable: true }));
-                else
-                    resolve(new ServiceResponse(true, 200, filedName + ' exists.', { isAvailable: false }));
-            }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, filedName + 'Internal error occured.', error));
+        console.log(filedName);
+        if (filedName === 'username' && value === 'rootadmin') {
+            return new Promise((resolve: any) => {
+                resolve(new ServiceResponse(false, 200, filedName + ' not allowed to be used.', { isAvailable: false }));
             });
-        });
+        } else {
+            let searchObj: any = filedName === 'username' ? { username: value } : { email: value };
+            return new Promise((resolve: any, reject: any) => {
+                UserModel.findOne(searchObj).countDocuments().then((count: number) => {
+                    if (count === 0)
+                        resolve(new ServiceResponse(true, 200, filedName + ' is Available.', { isAvailable: true }));
+                    else
+                        resolve(new ServiceResponse(false, 200, filedName + ' is already exists.', { isAvailable: false }));
+                }).catch((error: any) => {
+                    reject(new ServiceResponse(false, 500, filedName + 'Internal error occured.', error));
+                });
+            });
+        }
     }
 
     public changePassword(username: string, currentPassword: string, newPassword: string): Promise<ServiceResponse> {
@@ -99,7 +104,8 @@ export default class UserController {
         });
     }
 
-    public create(userInfo: any, file: any): Promise<ServiceResponse> {
+    private createUser(userInfo: any, file: any, role: string): Promise<ServiceResponse> {
+        const imageName: string = file ? file.filename : config.defaultProfileImage.imageName;
         const userModel = new UserModel({
             firstName: userInfo.firstName,
             lastName: userInfo.lastName,
@@ -107,8 +113,8 @@ export default class UserController {
             phone: userInfo.phone,
             username: userInfo.username,
             password: UserModels.hashPassword(userInfo.password),
-            role: userInfo.role,
-            imageUrl: config.services.users + '/image/' + file.filename
+            role: role,
+            imageUrl: config.services.users + '/image/' + imageName
         });
 
         return new Promise((resolve: any, reject: any) => {
@@ -117,6 +123,22 @@ export default class UserController {
             }).catch((error: any) => {
                 reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
+        });
+    }
+
+    public createAdminUser(userInfo: any, file: any): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            this.createUser(userInfo, file, 'admin')
+                .then((result: ServiceResponse) => resolve(new ServiceResponse(true, 200, 'New user has been registered successfully.', result.data)))
+                .catch((error: ServiceResponse) => reject(new ServiceResponse(false, 500, 'Internal Error occured.', error)));
+        });
+    }
+
+    public createOrdinaryUser(userInfo: any, file: any): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            this.createUser(userInfo, file, 'user')
+                .then((result: ServiceResponse) => resolve(result))
+                .catch((error: ServiceResponse) => reject(error));
         });
     }
 
@@ -145,7 +167,7 @@ export default class UserController {
 
     public deleteAll(): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
-            UserModel.deleteMany({}).then(() => {
+            UserModel.deleteMany({ role: { $ne: 'admin' } }).then(() => {
                 rimraf(config.files.usersProfileImages + '*', () => {
                     resolve(new ServiceResponse(true, 204, 'All users have been deleted successfully.'));
                 });
@@ -165,9 +187,9 @@ export default class UserController {
                 FileOperations.deleteFile(config.files.usersProfileImages + imageName).then(() => {
                     resolve(new ServiceResponse(true, 204, 'User info has been deleted successfully.'));
                 })
-                .catch(error => {
-                    reject(new ServiceResponse(false, 500, error.message, error));    
-                });
+                    .catch(error => {
+                        reject(new ServiceResponse(false, 500, error.message, error));
+                    });
             }).catch((error: any) => {
                 reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
             });
@@ -184,12 +206,13 @@ export default class UserController {
         });
     }
 
-    public provideImage(imageUrl: string): Promise<ServiceResponse> {
+    public provideImage(imageName: string): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
-            let imagePath = config.files.usersProfileImages + imageUrl;
+            const imageUrl = (imageName === config.defaultProfileImage.imageName ? config.defaultProfileImage.path : config.files.usersProfileImages) + imageName;
+            console.log('image url:', imageUrl, imageName);
             //Check first if the image exist
-            FileOperations.fileStat(imagePath)
-                .then(data => resolve(new ServiceResponse(true, 200, 'image fetched.', { data, imagePath })))
+            FileOperations.fileStat(imageUrl)
+                .then(data => resolve(new ServiceResponse(true, 200, 'Image fetched.', { data, imageUrl })))
                 .catch(error => reject(new ServiceResponse(false, 500, 'No image found.', error)));
         });
     }

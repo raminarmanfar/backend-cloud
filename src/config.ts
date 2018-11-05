@@ -1,4 +1,8 @@
 export default {
+  defaultProfileImage: {
+    imageName: 'defaultUser.png',
+    path: 'uploads/'
+  },
   http: {
     host: process.env.host || 'localhost',
     port: process.env.PORT || 5000

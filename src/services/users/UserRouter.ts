@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express';
 import UserController from './UserController';
 import { Authentication } from '../Authentication';
 import multer from 'multer';
+import config from '../../config';
 
 // const uploadMicroservicesImages = multer({ dest: `${config.fileStorage.usersProfileImageUrl}` });
 export default class UserRouter {
@@ -31,12 +32,13 @@ export default class UserRouter {
         this.router.get('/:username', Authentication.verifyUserToken, this.getUserByUsername);
         this.router.get('/available/:fieldName/:value', this.getIsAvailable);
         this.router.post('/change-password', Authentication.verifyUserToken, this.changePassword);
-        this.router.post('/', this.uploader.single('photo'), this.create);
+        this.router.post('/', this.uploader.single('photo'), this.createOrdinaryUser);
+        this.router.post('/createAdminUser/:userId', this.uploader.single('photo'), this.createAdminUser);
         this.router.put('/current', Authentication.verifyUserToken, this.updateCurrentUser);
         this.router.put('/:username', Authentication.verifyUserToken, this.updateByUsername);
         this.router.delete('/all', Authentication.verifyUserToken, this.deleteAll);
         this.router.delete('/:username', Authentication.verifyUserToken, this.deleteByUsername);
-        this.router.get('/image/:imageUrl', this.provideImage);
+        this.router.get('/image/:imageName', this.provideImage);
         // this.router.post('/upload-image', this.uploader.single('photo'), this.uploadImage);
     }
 
@@ -76,8 +78,14 @@ export default class UserRouter {
             .catch(error => res.status(error.statusCode).json(error));
     }
 
-    public create(req: Request, res: Response): void {
-        new UserController().create(req.body, req.file)
+    public createOrdinaryUser(req: Request, res: Response): void {
+        new UserController().createOrdinaryUser(req.body, req.file)
+            .then(result => res.status(result.statusCode).json(result))
+            .catch(error => res.status(error.statusCode).json(error));
+    }
+
+    public createAdminUser(req: Request, res: Response): void {
+        new UserController().createAdminUser(req.body, req.file)
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }
@@ -113,8 +121,8 @@ export default class UserRouter {
     }
 
     public provideImage(req: Request, res: Response): void {
-        new UserController().provideImage(req.params.imageUrl)
-            .then(result => res.status(result.statusCode).download(result.data.imagePath))
+        new UserController().provideImage(req.params.imageName)
+            .then(result => res.status(result.statusCode).download(result.data.imageUrl))
             .catch(error => res.status(error.statusCode).json(error));
     }
 }
