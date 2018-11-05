@@ -13,7 +13,7 @@ export default {
     contacts: '/api/contacts'
   },
   files: {
-    usersProfileImages: 'uploads/profileImages/',
+    usersProfileImagesPath: 'uploads/profileImages/',
   },
   client: {
     host: process.env.host || 'localhost',

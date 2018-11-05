@@ -142,14 +142,15 @@ export default class UserController {
     }
 
     public updateByUsername(username: string, token: string, newData: any, file: any): Promise<ServiceResponse> {
-        const imageUrl: string = file ? config.services.users + '/image/' + file.filename : newData.oldImageUrl;
+        const oldImageUrl = newData.oldImageUrl.lenght > 0 ? newData.oldImageUrl : 'defaultUser.png';
+        const imageName: string = file ? file.filename : oldImageUrl;
         const userModel = {
             firstName: newData.firstName,
             lastName: newData.lastName,
             email: newData.email,
             phone: newData.phone,
             username: newData.username,
-            imageUrl: imageUrl
+            imageUrl: config.services.users + '/image/' + imageName
         };
 
         return new Promise((resolve: any, reject: any) => {
@@ -165,14 +166,15 @@ export default class UserController {
     }
 
     public updateCurrentUser(decodedToken: any, token: string, newData: any, file: any): Promise<ServiceResponse> {
-        const imageUrl: string = file ? config.services.users + '/image/' + file.filename : newData.oldImageUrl;
+        const oldImageUrl = newData.oldImageUrl.lenght > 0 ? newData.oldImageUrl : 'defaultUser.png';
+        const imageName: string = file ? file.filename : oldImageUrl;
         const userModel = {
             firstName: newData.firstName,
             lastName: newData.lastName,
             email: newData.email,
             phone: newData.phone,
             username: newData.username,
-            imageUrl: imageUrl
+            imageUrl: config.services.users + '/image/' + imageName
         };
 
         return new Promise((resolve: any, reject: any) => {
@@ -190,7 +192,7 @@ export default class UserController {
     public deleteAll(): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
             UserModel.deleteMany({ role: { $ne: 'admin' } }).then(() => {
-                rimraf(config.files.usersProfileImages + '*', () => {
+                rimraf(config.files.usersProfileImagesPath + '*', () => {
                     resolve(new ServiceResponse(true, 204, 'All users have been deleted successfully.'));
                 });
             }).catch((error: any) => {
@@ -204,7 +206,7 @@ export default class UserController {
             UserModel.findOneAndRemove({ username }).then((result: any) => {
                 let imageName: string = result.imageUrl;
                 imageName = imageName.substring(imageName.lastIndexOf('/') + 1);
-                FileOperations.deleteFile(config.files.usersProfileImages + imageName).then(() => {
+                FileOperations.deleteFile(config.files.usersProfileImagesPath + imageName).then(() => {
                     resolve(new ServiceResponse(true, 204, 'User info has been deleted successfully.'));
                 })
                     .catch(error => {
@@ -228,7 +230,7 @@ export default class UserController {
 
     public provideImage(imageName: string): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
-            const imageUrl = (imageName === config.defaultProfileImage.imageName ? config.defaultProfileImage.path : config.files.usersProfileImages) + imageName;
+            const imageUrl = (imageName === config.defaultProfileImage.imageName ? config.defaultProfileImage.path : config.files.usersProfileImagesPath) + imageName;
             //Check first if the image exist
             FileOperations.fileStat(imageUrl)
                 .then(data => resolve(new ServiceResponse(true, 200, 'Image fetched.', { data, imageUrl })))
