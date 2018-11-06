@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as promise from 'promise';
-import { Response } from 'express';
 import { ServiceResponse } from './models/ServiceResponse';
 /**
  * Denodeify fs stat method 
@@ -23,5 +22,18 @@ export function deleteFile(path: any): Promise<ServiceResponse> {
             // If the file is not found carry on. If there is a different error throw a 500 error and abort.
             reject(new ServiceResponse(false, 500, 'Error deleting file.', error));
         });
+    });
+}
+
+export function deleteFiles(files: Array<string>): Promise<ServiceResponse> {
+    return new Promise((resolve: any, reject: any) => {
+        for(let file of files) {
+            if (file !== 'defaultUser.png') {
+            deleteFile(file)
+                //.then((result: ServiceResponse) => resolve(result))
+                .catch((error: ServiceResponse) => reject(error));
+            }
+        }
+        resolve(new ServiceResponse(true, 200, 'All users profile images deleted.'));
     });
 }

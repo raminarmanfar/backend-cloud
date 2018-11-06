@@ -1,4 +1,3 @@
-import { UserRoleEnum } from '../../models/enums/UserRoleEnum';
 import { ServiceResponse } from '../../models/ServiceResponse';
 import { Promise } from 'mongoose';
 import jwt from 'jsonwebtoken';
@@ -6,7 +5,6 @@ import UserModel from "./UserModel";
 import * as FileOperations from '../../FileOperations';
 import config from "../../config";
 const UserModels = require('./UserModel');
-import rimraf from 'rimraf';
 
 export default class UserController {
     public login(user: any): Promise<ServiceResponse> {
@@ -157,17 +155,24 @@ export default class UserController {
             UserModel.findOneAndUpdate({ username }, userModel).then((userInfo: any) => {
                 UserModel.findById(userInfo._id).then(updatedUserInfo => {
                     const dataToSend = { userInfo: updatedUserInfo, token };
-                    resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend));
+                    if (newData.oldImageUrl !== imageName && newData.oldImageUrl !== 'defaultUser.png') {
+                        FileOperations.deleteFile(config.files.usersProfileImagesPath + newData.oldImageUrl)
+                            .then(() => resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend)))
+                            .catch(error => new ServiceResponse(false, 500, 'Internal Error occured while deleting file.', error));
+                    } else {
+                        resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend));
+                    }
                 });
             }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
+                reject(new ServiceResponse(false, 500, 'Internal Error occured while updating user information.', error));
             });
         });
     }
 
     public updateCurrentUser(decodedToken: any, token: string, newData: any, file: any): Promise<ServiceResponse> {
-        const oldImageUrl = newData.oldImageUrl.lenght > 0 ? newData.oldImageUrl : 'defaultUser.png';
-        const imageName: string = file ? file.filename : oldImageUrl;
+        // const imageName: string = newData.hasImage ? file.filename : 
+        const imageName: string = file ? file.filename : (newData.hasImage === 'true' ? newData.oldImageUrl : 'defaultUser.png');
+
         const userModel = {
             firstName: newData.firstName,
             lastName: newData.lastName,
@@ -181,7 +186,13 @@ export default class UserController {
             UserModel.findOneAndUpdate({ username: decodedToken.user.usernameOrEmail }, userModel).then((userInfo: any) => {
                 UserModel.findById(userInfo._id).then(updatedUserInfo => {
                     const dataToSend = { userInfo: updatedUserInfo, token };
-                    resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend));
+                    if (newData.oldImageUrl !== imageName && newData.oldImageUrl !== 'defaultUser.png') {
+                        FileOperations.deleteFile(config.files.usersProfileImagesPath + newData.oldImageUrl)
+                            .then(() => resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend)))
+                            .catch(error => new ServiceResponse(false, 500, 'Internal Error occured while deleting file.', error));
+                    } else {
+                        resolve(new ServiceResponse(true, 200, 'Current user info has been updated successfully.', dataToSend));
+                    }
                 });
             }).catch((error: any) => {
                 reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
@@ -189,15 +200,35 @@ export default class UserController {
         });
     }
 
+    private deleteAllUsersProfileImages(): Promise<ServiceResponse> {
+        return new Promise((resolve: any, reject: any) => {
+            UserModel.find({ role: 'user' }).then((foundRecords: Array<any>) => {
+                let imageFiles: Array<string> = new Array<string>();
+                for (let record of foundRecords) {
+                    let imageName: string = record.imageUrl;
+                    imageName = imageName.substring(imageName.lastIndexOf('/') + 1);
+                    imageFiles.push(config.files.usersProfileImagesPath + imageName);
+                }
+                FileOperations.deleteFiles(imageFiles)
+                    //.then((result: ServiceResponse) => resolve(result))
+                    .catch((error: ServiceResponse) => reject(error));
+                resolve(new ServiceResponse(true, 200, 'No records found in the database!'));
+            })
+            .catch(error => resolve(new ServiceResponse(false, 500, 'Internal error occured while fetching the list of profile images!', error)));
+        });
+    }
+
     public deleteAll(): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
-            UserModel.deleteMany({ role: { $ne: 'admin' } }).then(() => {
-                rimraf(config.files.usersProfileImagesPath + '*', () => {
+            this.deleteAllUsersProfileImages().then((ress) => {
+                console.log(ress);
+                UserModel.deleteMany({ role: { $ne: 'admin' } }).then(() => {
                     resolve(new ServiceResponse(true, 204, 'All users have been deleted successfully.'));
+                }).catch((error: any) => {
+                    reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
                 });
-            }).catch((error: any) => {
-                reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
-            });
+            })
+            .catch((error: ServiceResponse) => reject(error));
         });
     }
 
