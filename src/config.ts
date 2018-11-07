@@ -8,6 +8,7 @@ export default {
     port: process.env.PORT || 5000
   },
   services: {
+    menus: '/api/menus',
     users: '/api/users',
     posts: '/api/posts',
     contacts: '/api/contacts'

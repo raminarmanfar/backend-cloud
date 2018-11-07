@@ -12,6 +12,7 @@ import crypto from 'crypto';
 // import configs
 import config from './config';
 // import routers
+import MenuRouter from './services/menu/MenuRouter';
 import UserRouter from './services/users/UserRouter';
 import PostRouter from './services/posts/PostRouter';
 import ContactRouter from './services/contact/contactRouter';
@@ -72,6 +73,7 @@ export default class Server {
     const router: express.Router = express.Router();
 
     this.app.use('/', router);
+    this.app.use(config.services.menus, new MenuRouter(this.uploader).router);
     this.app.use(config.services.users, new UserRouter(this.uploader).router);
     this.app.use(config.services.posts, new PostRouter().router);
     this.app.use(config.services.contacts, new ContactRouter().router);

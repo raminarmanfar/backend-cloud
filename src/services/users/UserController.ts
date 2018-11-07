@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import UserModel from "./UserModel";
 import * as FileOperations from '../../FileOperations';
 import config from "../../config";
+import { UserRoleEnum } from '../../models/enums/UserRoleEnum';
 const UserModels = require('./UserModel');
 
 export default class UserController {
@@ -125,7 +126,7 @@ export default class UserController {
 
     public createAdminUser(userInfo: any, file: any): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
-            this.createUser(userInfo, file, 'admin')
+            this.createUser(userInfo, file, UserRoleEnum.Admin)
                 .then((result: ServiceResponse) => resolve(new ServiceResponse(true, 200, 'New user has been registered successfully.', result.data)))
                 .catch((error: ServiceResponse) => reject(new ServiceResponse(false, 500, 'Internal Error occured.', error)));
         });
@@ -133,7 +134,7 @@ export default class UserController {
 
     public createOrdinaryUser(userInfo: any, file: any): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
-            this.createUser(userInfo, file, 'user')
+            this.createUser(userInfo, file, UserRoleEnum.User)
                 .then((result: ServiceResponse) => resolve(result))
                 .catch((error: ServiceResponse) => reject(error));
         });
@@ -202,7 +203,7 @@ export default class UserController {
 
     private deleteAllUsersProfileImages(): Promise<ServiceResponse> {
         return new Promise((resolve: any, reject: any) => {
-            UserModel.find({ role: 'user' }).then((foundRecords: Array<any>) => {
+            UserModel.find({ role: UserRoleEnum.User }).then((foundRecords: Array<any>) => {
                 let imageFiles: Array<string> = new Array<string>();
                 for (let record of foundRecords) {
                     let imageName: string = record.imageUrl;
@@ -222,7 +223,7 @@ export default class UserController {
         return new Promise((resolve: any, reject: any) => {
             this.deleteAllUsersProfileImages().then((ress) => {
                 console.log(ress);
-                UserModel.deleteMany({ role: { $ne: 'admin' } }).then(() => {
+                UserModel.deleteMany({ role: { $ne: UserRoleEnum.Admin } }).then(() => {
                     resolve(new ServiceResponse(true, 204, 'All users have been deleted successfully.'));
                 }).catch((error: any) => {
                     reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
