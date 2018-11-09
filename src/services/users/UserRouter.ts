@@ -2,7 +2,6 @@ import { Request, Response, Router } from 'express';
 import UserController from './UserController';
 import { Authentication } from '../Authentication';
 import multer from 'multer';
-import config from '../../config';
 
 // const uploadMicroservicesImages = multer({ dest: `${config.fileStorage.usersProfileImageUrl}` });
 export default class UserRouter {

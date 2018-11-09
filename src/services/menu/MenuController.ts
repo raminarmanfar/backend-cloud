@@ -4,7 +4,7 @@ import { ServiceResponse } from '../../models/ServiceResponse';
 import { UserRoleEnum } from '../../models/enums/UserRoleEnum';
 
 export default class MenuController {
-    public getAll(userRole: UserRoleEnum): Promise<ServiceResponse> {
+    public getAll(): Promise<ServiceResponse> {
         const menuList: Array<MenuItem> = new Array<MenuItem>();
         menuList.push(new MenuItem('Home', '/', new Array<UserRoleEnum>(UserRoleEnum.Public, UserRoleEnum.User, UserRoleEnum.Admin), 'Home page'));
         menuList.push(new MenuItem('Dashboard', '/dashboard/user-page', new Array<UserRoleEnum>(UserRoleEnum.User), 'Your personal dashboard'));
@@ -16,8 +16,7 @@ export default class MenuController {
         menuList.push(new MenuItem('Contact Me', '/public/contact-me', new Array<UserRoleEnum>(UserRoleEnum.Public, UserRoleEnum.User, UserRoleEnum.Admin), 'Ways to contact me'));
 
         return new Promise((resolve: any) => {
-            const listToSend: Array<MenuItem> = menuList.filter(el => el.accessibleBy.includes(userRole));
-            resolve(new ServiceResponse(true, 200, 'Navbar menu items fetched.', listToSend));
+            resolve(new ServiceResponse(true, 200, 'Navbar menu items fetched.', menuList));
         });
     }
 }

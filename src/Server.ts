@@ -73,7 +73,7 @@ export default class Server {
     const router: express.Router = express.Router();
 
     this.app.use('/', router);
-    this.app.use(config.services.menus, new MenuRouter(this.uploader).router);
+    this.app.use(config.services.menus, new MenuRouter().router);
     this.app.use(config.services.users, new UserRouter(this.uploader).router);
     this.app.use(config.services.posts, new PostRouter().router);
     this.app.use(config.services.contacts, new ContactRouter().router);

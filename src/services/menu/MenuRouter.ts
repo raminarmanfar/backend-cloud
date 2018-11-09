@@ -12,12 +12,11 @@ export default class MenuRouter {
 
     // set up our routes
     public setRoutes() {
-        this.router.get('/:userRole', this.getAllMenus);
+        this.router.get('/', this.getAllMenus);
     }
 
     public getAllMenus(req: Request, res: Response): void {
-        console.log(req.params.userRole)
-        new MenuController().getAll(req.params.userRole)
+        new MenuController().getAll()
             .then(result => res.status(result.statusCode).json(result))
             .catch(error => res.status(error.statusCode).json(error));
     }
