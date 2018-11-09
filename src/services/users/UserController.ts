@@ -215,7 +215,7 @@ export default class UserController {
                     .catch((error: ServiceResponse) => reject(error));
                 resolve(new ServiceResponse(true, 200, 'No records found in the database!'));
             })
-            .catch(error => resolve(new ServiceResponse(false, 500, 'Internal error occured while fetching the list of profile images!', error)));
+                .catch(error => resolve(new ServiceResponse(false, 500, 'Internal error occured while fetching the list of profile images!', error)));
         });
     }
 
@@ -229,7 +229,7 @@ export default class UserController {
                     reject(new ServiceResponse(false, 500, 'Internal Error occured.', error));
                 });
             })
-            .catch((error: ServiceResponse) => reject(error));
+                .catch((error: ServiceResponse) => reject(error));
         });
     }
 
