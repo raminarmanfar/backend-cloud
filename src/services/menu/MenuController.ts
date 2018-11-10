@@ -7,8 +7,8 @@ export default class MenuController {
     public getAll(): Promise<ServiceResponse> {
         const menuList: Array<MenuItem> = new Array<MenuItem>();
         menuList.push(new MenuItem('Home', '/', new Array<UserRoleEnum>(UserRoleEnum.Public, UserRoleEnum.User, UserRoleEnum.Admin), 'Home page'));
-        menuList.push(new MenuItem('Dashboard', '/dashboard/user-page', new Array<UserRoleEnum>(UserRoleEnum.User), 'Your personal dashboard'));
-        menuList.push(new MenuItem('Dashboard', '/dashboard/admin-page', new Array<UserRoleEnum>(UserRoleEnum.Admin), 'Administrator dashboard'));
+        menuList.push(new MenuItem('Dashboard', '/dashboard', new Array<UserRoleEnum>(UserRoleEnum.User), 'Your personal dashboard'));
+        menuList.push(new MenuItem('Dashboard', '/dashboard', new Array<UserRoleEnum>(UserRoleEnum.Admin), 'Administrator dashboard'));
         menuList.push(new MenuItem('Manage Users', '/dashboard/manage-users', new Array<UserRoleEnum>(UserRoleEnum.Admin), 'My projects'));
         menuList.push(new MenuItem('Projects', '/public/projects', new Array<UserRoleEnum>(UserRoleEnum.Public, UserRoleEnum.User, UserRoleEnum.Admin), 'My projects'));
         menuList.push(new MenuItem('Goals', '/public/goals', new Array<UserRoleEnum>(UserRoleEnum.Public, UserRoleEnum.User, UserRoleEnum.Admin), 'My Goals'));
