@@ -140,7 +140,8 @@ export default class UserController {
         });
     }
 
-    public updateByUsername(username: string, token: string, newData: any, file: any): Promise<ServiceResponse> {
+    public updateById(id: string, token: string, newData: any, file: any): Promise<ServiceResponse> {
+        console.log('userdata:', id);
         const oldImageUrl = newData.oldImageUrl.lenght > 0 ? newData.oldImageUrl : 'defaultUser.png';
         const imageName: string = file ? file.filename : oldImageUrl;
         const userModel = {
@@ -153,7 +154,7 @@ export default class UserController {
         };
 
         return new Promise((resolve: any, reject: any) => {
-            UserModel.findOneAndUpdate({ username }, userModel).then((userInfo: any) => {
+            UserModel.findByIdAndUpdate(id, userModel).then((userInfo: any) => {
                 UserModel.findById(userInfo._id).then(updatedUserInfo => {
                     const dataToSend = { userInfo: updatedUserInfo, token };
                     if (newData.oldImageUrl !== imageName && newData.oldImageUrl !== 'defaultUser.png') {
